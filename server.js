@@ -4,57 +4,62 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-// Connect MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/mern-todo")
+/* MongoDB Connection */
+
+mongoose.connect("mongodb://127.0.0.1:27017/tododb")
 .then(() => console.log("MongoDB connected"))
-.catch(err => console.log(err));
+.catch((err) => console.log(err));
 
-// Todo Schema
+/* Todo Model */
+
 const TodoSchema = new mongoose.Schema({
-text: String
+  text: String
 });
 
 const Todo = mongoose.model("Todo", TodoSchema);
 
-// Get all todos
+/* Get Todos */
+
 app.get("/todos", async (req, res) => {
-try {
-const todos = await Todo.find();
-res.json(todos);
-} catch (error) {
-res.status(500).json(error);
-}
+  try {
+    const todos = await Todo.find();
+    res.json(todos);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
-// Add todo
+/* Add Todo */
+
 app.post("/add", async (req, res) => {
-try {
-const todo = new Todo({
-text: req.body.text
+  try {
+    const todo = new Todo({
+      text: req.body.text
+    });
+
+    await todo.save();
+    res.json(todo);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
-await todo.save();
-res.json(todo);
+/* Delete Todo */
 
-} catch (error) {
-res.status(500).json(error);
-}
-});
-
-// Delete todo
 app.delete("/delete/:id", async (req, res) => {
-try {
-await Todo.findByIdAndDelete(req.params.id);
-res.json({ message: "Deleted successfully" });
-} catch (error) {
-res.status(500).json(error);
-}
+  try {
+    await Todo.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted successfully" });
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
-// Start server
+/* Server */
+
 app.listen(5000, () => {
-console.log("Server running on port 5000");
+  console.log("Server running on port 5000");
 });
